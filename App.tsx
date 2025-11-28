@@ -10,8 +10,6 @@ import {
   UploadCloud,
   Image as ImageIcon,
   Smartphone,
-  Moon,
-  Sun,
   Globe,
   Lock,
   FileText,
@@ -24,7 +22,7 @@ import {
 } from 'lucide-react';
 import { ChatSupport } from './components/ChatSupport';
 import { OPERATORS, PAYMENT_METHODS, ADMIN_PHONE_NUMBER, TELEGRAM_PHONE_NUMBER, ADMIN_EMAIL, PAYMENT_DESTINATIONS, USDT_EXCHANGE_RATE, TRANSLATIONS } from './constants';
-import { OperatorId, PaymentMethodId, Transaction, Language, Theme } from './types';
+import { OperatorId, PaymentMethodId, Transaction, Language } from './types';
 
 // Simple navigation tabs
 type Tab = 'home' | 'history' | 'admin';
@@ -34,8 +32,7 @@ const App: React.FC = () => {
   
   // Settings State
   const [language, setLanguage] = useState<Language>('pt');
-  const [theme, setTheme] = useState<Theme>('light');
-
+  
   // Form State
   const [selectedOperator, setSelectedOperator] = useState<OperatorId>('vodacom');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -89,23 +86,11 @@ const App: React.FC = () => {
     const savedLang = localStorage.getItem('recargas_lang') as Language;
     if (savedLang) setLanguage(savedLang);
 
-    const savedTheme = localStorage.getItem('recargas_theme') as Theme;
-    if (savedTheme) setTheme(savedTheme);
-    else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setTheme('dark');
-    }
+    // Enforce Light Mode
+    document.documentElement.classList.remove('dark');
+    localStorage.removeItem('recargas_theme');
 
   }, []);
-
-  // Update Theme
-  useEffect(() => {
-    localStorage.setItem('recargas_theme', theme);
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [theme]);
 
   // Update Language
   useEffect(() => {
@@ -132,7 +117,6 @@ const App: React.FC = () => {
     localStorage.setItem('recargas_history', JSON.stringify(updatedHistory));
   };
 
-  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
   const toggleLanguage = () => setLanguage(prev => prev === 'pt' ? 'en' : 'pt');
 
   // Calculations
@@ -331,14 +315,14 @@ const App: React.FC = () => {
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md animate-in fade-in">
-        <div className="bg-white dark:bg-slate-900 w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl p-6 text-center space-y-6">
-           <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto animate-bounce">
+        <div className="bg-white w-full max-w-sm rounded-2xl overflow-hidden shadow-2xl p-6 text-center space-y-6">
+           <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto animate-bounce">
               <CheckCircle size={32} />
            </div>
            
            <div>
-             <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Pedido Registado!</h2>
-             <p className="text-sm text-slate-600 dark:text-slate-300">
+             <h2 className="text-xl font-bold text-slate-900 mb-2">Pedido Registado!</h2>
+             <p className="text-sm text-slate-600">
                Para processarmos sua recarga rapidamente, por favor, <strong>envie o comprovativo</strong> por um dos canais abaixo:
              </p>
            </div>
@@ -366,7 +350,7 @@ const App: React.FC = () => {
 
              <a 
                href={mailtoUrl}
-               className="flex items-center justify-center gap-3 w-full p-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+               className="flex items-center justify-center gap-3 w-full p-3 bg-slate-100 text-slate-700 border border-slate-200 rounded-xl font-bold hover:bg-slate-200 transition-colors"
              >
                <Mail size={20} />
                Enviar via Email
@@ -375,7 +359,7 @@ const App: React.FC = () => {
 
            <button 
              onClick={onClose}
-             className="text-slate-400 text-sm hover:text-slate-600 dark:hover:text-slate-200 font-medium"
+             className="text-slate-400 text-sm hover:text-slate-600 font-medium"
            >
              Agora não (ver histórico)
            </button>
@@ -386,15 +370,15 @@ const App: React.FC = () => {
 
   const FileUploadField = () => (
     <div className="mt-4">
-        <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2 uppercase">{t.proofOfPayment}</label>
+        <label className="block text-xs font-semibold text-slate-500 mb-2 uppercase">{t.proofOfPayment}</label>
         <div 
             onClick={() => setErrors(prev => ({...prev, proof: ''}))}
             className={`border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center text-center transition-all cursor-pointer relative ${
             errors.proof
-            ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+            ? 'border-red-500 bg-red-50'
             : proofFile 
-            ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
-            : 'border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800'
+            ? 'border-green-500 bg-green-50' 
+            : 'border-slate-300 hover:bg-slate-50'
         }`}>
             <input
                 type="file"
@@ -406,18 +390,18 @@ const App: React.FC = () => {
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
             />
             {proofFile ? (
-                <div className="flex items-center gap-3 text-green-700 dark:text-green-400 z-0">
+                <div className="flex items-center gap-3 text-green-700 z-0">
                     <ImageIcon size={24} />
                     <div className="text-left overflow-hidden">
                         <p className="text-sm font-bold truncate max-w-[150px]">{proofFile.name}</p>
-                        <p className="text-[10px] text-green-600 dark:text-green-500">{t.clickToChange}</p>
+                        <p className="text-[10px] text-green-600">{t.clickToChange}</p>
                     </div>
                     <CheckCircle size={20} className="text-green-500 ml-2" />
                 </div>
             ) : (
                 <div className="flex flex-col items-center gap-1 z-0">
                     <UploadCloud size={24} className={errors.proof ? "text-red-500" : "text-slate-400"} />
-                    <p className={`text-sm font-medium ${errors.proof ? 'text-red-500' : 'text-slate-600 dark:text-slate-300'}`}>
+                    <p className={`text-sm font-medium ${errors.proof ? 'text-red-500' : 'text-slate-600'}`}>
                         {errors.proof ? errors.proof : t.tapToUpload}
                     </p>
                     <p className="text-[10px] text-slate-400">JPG, PNG, Screenshot</p>
@@ -428,7 +412,7 @@ const App: React.FC = () => {
   );
 
   return (
-    <div className={`min-h-screen font-sans transition-colors duration-300 ${theme === 'dark' ? 'dark bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'} pb-24 md:pb-0`}>
+    <div className="min-h-screen font-sans bg-slate-50 text-slate-900 pb-24 md:pb-0">
       
       {/* Receipt Modal */}
       {receiptTransaction && (
@@ -452,15 +436,15 @@ const App: React.FC = () => {
       {/* Admin Login Modal */}
       {showAdminLogin && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 w-full max-w-xs p-6 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700">
+          <div className="bg-white w-full max-w-xs p-6 rounded-2xl shadow-2xl border border-slate-200">
              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-bold text-lg dark:text-white">Admin Login</h3>
+                <h3 className="font-bold text-lg">Admin Login</h3>
                 <button onClick={() => setShowAdminLogin(false)}><X size={20} className="text-slate-500" /></button>
              </div>
              <input 
                type="password" 
                placeholder="Senha" 
-               className="w-full p-3 mb-4 rounded-xl border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+               className="w-full p-3 mb-4 rounded-xl border border-slate-300"
                value={adminPassword}
                onChange={e => setAdminPassword(e.target.value)}
              />
@@ -475,42 +459,38 @@ const App: React.FC = () => {
       )}
 
       {/* Navbar */}
-      <nav className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 shadow-sm transition-colors duration-300">
+      <nav className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
         <div className="max-w-3xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="bg-blue-600 text-white p-1.5 rounded-lg font-bold text-xl">R</div>
-            <h1 className="font-bold text-slate-800 dark:text-white text-lg tracking-tight hidden sm:block">{t.appTitle}</h1>
-            <h1 className="font-bold text-slate-800 dark:text-white text-lg tracking-tight sm:hidden">Recargas</h1>
+            <h1 className="font-bold text-slate-800 text-lg tracking-tight hidden sm:block">{t.appTitle}</h1>
+            <h1 className="font-bold text-slate-800 text-lg tracking-tight sm:hidden">Recargas</h1>
           </div>
           <div className="flex items-center gap-2">
-             {/* Theme Toggle */}
-             <button onClick={toggleTheme} className="p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-               {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
-             </button>
              
              {/* Admin Toggle */}
-             <button onClick={() => isAdmin ? setActiveTab('admin') : setShowAdminLogin(true)} className={`p-2 rounded-full transition-colors ${isAdmin ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20' : 'text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
+             <button onClick={() => isAdmin ? setActiveTab('admin') : setShowAdminLogin(true)} className={`p-2 rounded-full transition-colors ${isAdmin ? 'text-blue-600 bg-blue-50' : 'text-slate-400 hover:bg-slate-100'}`}>
                 <Lock size={20} />
              </button>
              
              {/* Language Toggle */}
-             <button onClick={toggleLanguage} className="flex items-center gap-1 px-2 py-1 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors font-medium text-xs">
+             <button onClick={toggleLanguage} className="flex items-center gap-1 px-2 py-1 rounded-full text-slate-500 hover:bg-slate-100 transition-colors font-medium text-xs">
                 <Globe size={16} />
                 <span>{language.toUpperCase()}</span>
              </button>
 
-             <div className="h-6 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+             <div className="h-6 w-px bg-slate-200 mx-1"></div>
 
-             <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+             <div className="flex gap-1 bg-slate-100 p-1 rounded-lg">
                 <button 
                     onClick={() => setActiveTab('home')}
-                    className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${activeTab === 'home' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                    className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${activeTab === 'home' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                 >
                   {t.buy}
                 </button>
                 <button 
                     onClick={() => setActiveTab('history')}
-                    className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${activeTab === 'history' ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                    className={`px-3 py-1 text-sm font-medium rounded-md transition-all ${activeTab === 'history' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                 >
                   {t.history}
                 </button>
@@ -526,7 +506,7 @@ const App: React.FC = () => {
             
             {/* Operator Selection */}
             <section>
-              <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-3 tracking-wider">{t.chooseOperator}</h2>
+              <h2 className="text-xs font-bold text-slate-500 uppercase mb-3 tracking-wider">{t.chooseOperator}</h2>
               <div className="grid grid-cols-3 gap-3">
                 {OPERATORS.map((op) => (
                   <button
@@ -534,8 +514,8 @@ const App: React.FC = () => {
                     onClick={() => setSelectedOperator(op.id)}
                     className={`relative overflow-hidden rounded-2xl p-4 flex flex-col items-center justify-center gap-3 transition-all border-2 h-32 ${
                       selectedOperator === op.id 
-                        ? `${op.color.replace('bg-', 'border-')} bg-white dark:bg-slate-800 shadow-lg scale-[1.02]` 
-                        : 'border-transparent bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'
+                        ? `${op.color.replace('bg-', 'border-')} bg-white shadow-lg scale-[1.02]` 
+                        : 'border-transparent bg-white text-slate-400 hover:bg-slate-100'
                     }`}
                   >
                     <div className="w-full h-16 flex items-center justify-center relative">
@@ -554,13 +534,13 @@ const App: React.FC = () => {
                       </div>
                     </div>
                     
-                    <span className={`text-sm font-bold ${selectedOperator === op.id ? 'text-slate-900 dark:text-white' : 'text-slate-400 dark:text-slate-500'}`}>
+                    <span className={`text-sm font-bold ${selectedOperator === op.id ? 'text-slate-900' : 'text-slate-400'}`}>
                       {op.name}
                     </span>
                     
                     {selectedOperator === op.id && (
-                      <div className="absolute top-2 right-2 text-blue-600 dark:text-blue-400">
-                        <CheckCircle size={18} className="fill-blue-600 dark:fill-blue-400 text-white dark:text-slate-800" />
+                      <div className="absolute top-2 right-2 text-blue-600">
+                        <CheckCircle size={18} className="fill-blue-600 text-white" />
                       </div>
                     )}
                   </button>
@@ -569,12 +549,12 @@ const App: React.FC = () => {
             </section>
 
             {/* Input Details */}
-            <section className="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 space-y-4 transition-colors">
-              <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{t.rechargeDetails}</h2>
+            <section className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+              <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{t.rechargeDetails}</h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{t.numberToRecharge}</label>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">{t.numberToRecharge}</label>
                   <div className="relative">
                     <Phone className={`absolute left-3 top-1/2 -translate-y-1/2 ${errors.phoneNumber ? 'text-red-400' : 'text-slate-400'}`} size={18} />
                     <input 
@@ -582,8 +562,8 @@ const App: React.FC = () => {
                       value={phoneNumber}
                       onChange={(e) => handlePhoneInput(e, setPhoneNumber, 'phoneNumber')}
                       placeholder="84/85 123 4567"
-                      className={`w-full pl-10 p-3 bg-slate-50 dark:bg-slate-900 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all font-mono text-lg text-slate-900 dark:text-white ${
-                        errors.phoneNumber ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-200 dark:border-slate-700'
+                      className={`w-full pl-10 p-3 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all font-mono text-lg text-slate-900 ${
+                        errors.phoneNumber ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-200'
                       }`}
                     />
                   </div>
@@ -591,7 +571,7 @@ const App: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{t.rechargeAmount}</label>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1">{t.rechargeAmount}</label>
                   <div className="relative">
                     <span className={`absolute left-3 top-1/2 -translate-y-1/2 font-bold ${errors.amount ? 'text-red-400' : 'text-slate-400'}`}>MT</span>
                     <input 
@@ -602,8 +582,8 @@ const App: React.FC = () => {
                         if (errors.amount) setErrors(prev => ({...prev, amount: ''}));
                       }}
                       placeholder="100"
-                      className={`w-full pl-10 p-3 bg-slate-50 dark:bg-slate-900 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all font-mono text-lg text-slate-900 dark:text-white ${
-                        errors.amount ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-200 dark:border-slate-700'
+                      className={`w-full pl-10 p-3 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all font-mono text-lg text-slate-900 ${
+                        errors.amount ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-200'
                       }`}
                     />
                   </div>
@@ -614,7 +594,7 @@ const App: React.FC = () => {
 
             {/* Payment Method Selection */}
             <section>
-              <h2 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-3 tracking-wider">{t.paymentMethod}</h2>
+              <h2 className="text-xs font-bold text-slate-500 uppercase mb-3 tracking-wider">{t.paymentMethod}</h2>
               <div className="grid grid-cols-3 gap-3 mb-6">
                 {PAYMENT_METHODS.map((method) => (
                   <button
@@ -627,21 +607,21 @@ const App: React.FC = () => {
                     }}
                     className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-2 transition-all ${
                       paymentMethod === method.id 
-                        ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/20 ring-1 ring-blue-500' 
-                        : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700'
+                        ? 'border-blue-500 bg-blue-50/50 ring-1 ring-blue-500' 
+                        : 'border-slate-200 bg-white hover:bg-slate-50'
                     }`}
                   >
                     <span className="text-2xl">{method.icon}</span>
                     <div className="text-center">
-                      <div className="text-xs font-bold text-slate-800 dark:text-white">{method.name}</div>
-                      <div className="text-[10px] text-green-600 dark:text-green-400 font-medium">-{method.discountPercent}% OFF</div>
+                      <div className="text-xs font-bold text-slate-800">{method.name}</div>
+                      <div className="text-[10px] text-green-600 font-medium">-{method.discountPercent}% OFF</div>
                     </div>
                   </button>
                 ))}
               </div>
 
               {/* Dynamic Payment Instructions Area */}
-              <div className="bg-slate-100 dark:bg-slate-900 rounded-2xl p-5 border border-slate-200 dark:border-slate-800 relative overflow-hidden transition-colors">
+              <div className="bg-slate-100 rounded-2xl p-5 border border-slate-200 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-2 opacity-10">
                    {activeMethod?.icon && <span className="text-6xl">{activeMethod.icon}</span>}
                 </div>
@@ -650,31 +630,31 @@ const App: React.FC = () => {
                 {paymentMethod === 'mpesa' && (
                   <div className="space-y-4 animate-in fade-in slide-in-from-top-2 relative z-10">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{t.yourMpesaNumber}</label>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1">{t.yourMpesaNumber}</label>
                       <input 
                         type="tel" 
                         value={paymentFromNumber}
                         onChange={(e) => handlePhoneInput(e, setPaymentFromNumber, 'paymentFrom')}
                         placeholder="84..."
-                        className={`w-full p-3 bg-white dark:bg-slate-800 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono text-slate-900 dark:text-white ${
-                            errors.paymentFrom ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-300 dark:border-slate-600'
+                        className={`w-full p-3 bg-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono text-slate-900 ${
+                            errors.paymentFrom ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-300'
                         }`}
                       />
                       {errors.paymentFrom && <p className="text-red-500 text-xs mt-1 font-medium">{errors.paymentFrom}</p>}
                     </div>
                     
                     {/* Instructions + Manual Copy */}
-                    <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-dashed border-slate-300 dark:border-slate-600">
-                      <p className="text-sm text-slate-700 dark:text-slate-300 mt-2">
+                    <div className="bg-white p-4 rounded-xl border border-dashed border-slate-300">
+                      <p className="text-sm text-slate-700 mt-2">
                         {t.transferTo} <strong>{finalAmount > 0 ? finalAmount.toFixed(2) : '...'} MT</strong>:
                       </p>
-                      <div className="flex items-center gap-2 mt-2 bg-slate-50 dark:bg-slate-900 p-2 rounded-lg border border-slate-200 dark:border-slate-700 mb-4">
-                        <span className="font-mono text-lg font-bold text-slate-800 dark:text-slate-100 flex-1">{PAYMENT_DESTINATIONS.mpesa}</span>
+                      <div className="flex items-center gap-2 mt-2 bg-slate-50 p-2 rounded-lg border border-slate-200 mb-4">
+                        <span className="font-mono text-lg font-bold text-slate-800 flex-1">{PAYMENT_DESTINATIONS.mpesa}</span>
                         <button 
                           onClick={() => copyToClipboard(PAYMENT_DESTINATIONS.mpesa, 'mpesa')}
-                          className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md text-slate-500 transition-colors"
+                          className="p-2 hover:bg-slate-200 rounded-md text-slate-500 transition-colors"
                         >
-                          {copiedText === 'mpesa' ? <CheckCircle size={18} className="text-green-600 dark:text-green-400"/> : <Copy size={18} />}
+                          {copiedText === 'mpesa' ? <CheckCircle size={18} className="text-green-600"/> : <Copy size={18} />}
                         </button>
                       </div>
 
@@ -698,30 +678,30 @@ const App: React.FC = () => {
                 {paymentMethod === 'emola' && (
                   <div className="space-y-4 animate-in fade-in slide-in-from-top-2 relative z-10">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">{t.yourEmolaNumber}</label>
+                      <label className="block text-xs font-semibold text-slate-500 mb-1">{t.yourEmolaNumber}</label>
                       <input 
                         type="tel" 
                         value={paymentFromNumber}
                         onChange={(e) => handlePhoneInput(e, setPaymentFromNumber, 'paymentFrom')}
                         placeholder="86/87..."
-                        className={`w-full p-3 bg-white dark:bg-slate-800 border rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono text-slate-900 dark:text-white ${
-                            errors.paymentFrom ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-300 dark:border-slate-600'
+                        className={`w-full p-3 bg-white border rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono text-slate-900 ${
+                            errors.paymentFrom ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-300'
                         }`}
                       />
                       {errors.paymentFrom && <p className="text-red-500 text-xs mt-1 font-medium">{errors.paymentFrom}</p>}
                     </div>
                     
-                    <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-dashed border-slate-300 dark:border-slate-600">
-                      <p className="text-sm text-slate-700 dark:text-slate-300 mt-2">
+                    <div className="bg-white p-4 rounded-xl border border-dashed border-slate-300">
+                      <p className="text-sm text-slate-700 mt-2">
                          {t.transferTo} <strong>{finalAmount > 0 ? finalAmount.toFixed(2) : '...'} MT</strong>:
                       </p>
-                      <div className="flex items-center gap-2 mt-2 bg-slate-50 dark:bg-slate-900 p-2 rounded-lg border border-slate-200 dark:border-slate-700 mb-4">
-                        <span className="font-mono text-lg font-bold text-slate-800 dark:text-slate-100 flex-1">{PAYMENT_DESTINATIONS.emola}</span>
+                      <div className="flex items-center gap-2 mt-2 bg-slate-50 p-2 rounded-lg border border-slate-200 mb-4">
+                        <span className="font-mono text-lg font-bold text-slate-800 flex-1">{PAYMENT_DESTINATIONS.emola}</span>
                         <button 
                           onClick={() => copyToClipboard(PAYMENT_DESTINATIONS.emola, 'emola')}
-                          className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md text-slate-500 transition-colors"
+                          className="p-2 hover:bg-slate-200 rounded-md text-slate-500 transition-colors"
                         >
-                          {copiedText === 'emola' ? <CheckCircle size={18} className="text-green-600 dark:text-green-400"/> : <Copy size={18} />}
+                          {copiedText === 'emola' ? <CheckCircle size={18} className="text-green-600"/> : <Copy size={18} />}
                         </button>
                       </div>
 
@@ -744,51 +724,51 @@ const App: React.FC = () => {
                 {/* USDT */}
                 {paymentMethod === 'usdt' && (
                   <div className="space-y-4 animate-in fade-in slide-in-from-top-2 relative z-10">
-                     <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-dashed border-slate-300 dark:border-slate-600 space-y-4">
+                     <div className="bg-white p-4 rounded-xl border border-dashed border-slate-300 space-y-4">
                       
                       {/* USDT Conversion Display */}
-                      <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 p-3 rounded-lg flex items-center justify-between">
+                      <div className="bg-blue-50 border border-blue-100 p-3 rounded-lg flex items-center justify-between">
                          <div>
-                            <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase">{t.totalToPayUSDT}</p>
-                            <p className="text-2xl font-bold text-slate-800 dark:text-white">
+                            <p className="text-xs font-semibold text-blue-600 uppercase">{t.totalToPayUSDT}</p>
+                            <p className="text-2xl font-bold text-slate-800">
                               {finalAmount > 0 ? usdtAmount.toFixed(2) : '0.00'} <span className="text-sm text-slate-500">USDT</span>
                             </p>
                          </div>
                          <div className="text-right">
-                           <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">{t.exchangeRate}</p>
-                           <p className="text-xs font-bold text-slate-700 dark:text-slate-300">1 USDT = {USDT_EXCHANGE_RATE} MT</p>
+                           <p className="text-[10px] text-slate-500 font-medium">{t.exchangeRate}</p>
+                           <p className="text-xs font-bold text-slate-700">1 USDT = {USDT_EXCHANGE_RATE} MT</p>
                          </div>
                       </div>
 
                       <div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1 font-semibold">Binance ID (Pay ID)</p>
-                        <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
-                          <span className="font-mono text-sm font-bold text-slate-800 dark:text-white flex-1">{PAYMENT_DESTINATIONS.usdt_binance_id}</span>
+                        <p className="text-xs text-slate-500 mb-1 font-semibold">Binance ID (Pay ID)</p>
+                        <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
+                          <span className="font-mono text-sm font-bold text-slate-800 flex-1">{PAYMENT_DESTINATIONS.usdt_binance_id}</span>
                           <button 
                             onClick={() => copyToClipboard(PAYMENT_DESTINATIONS.usdt_binance_id, 'binance')}
-                            className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md text-slate-500 transition-colors"
+                            className="p-1 hover:bg-slate-200 rounded-md text-slate-500 transition-colors"
                           >
-                            {copiedText === 'binance' ? <CheckCircle size={16} className="text-green-600 dark:text-green-400"/> : <Copy size={16} />}
+                            {copiedText === 'binance' ? <CheckCircle size={16} className="text-green-600"/> : <Copy size={16} />}
                           </button>
                         </div>
                       </div>
 
                       <div>
-                         <p className="text-xs text-slate-500 dark:text-slate-400 mb-1 font-semibold">{t.walletAddress}</p>
-                        <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 p-2 rounded-lg border border-slate-200 dark:border-slate-700">
-                          <span className="font-mono text-[10px] sm:text-xs text-slate-600 dark:text-slate-300 flex-1 break-all leading-tight">
+                         <p className="text-xs text-slate-500 mb-1 font-semibold">{t.walletAddress}</p>
+                        <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
+                          <span className="font-mono text-[10px] sm:text-xs text-slate-600 flex-1 break-all leading-tight">
                             {PAYMENT_DESTINATIONS.usdt_wallet}
                           </span>
                           <button 
                             onClick={() => copyToClipboard(PAYMENT_DESTINATIONS.usdt_wallet, 'wallet')}
-                            className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-md text-slate-500 transition-colors shrink-0"
+                            className="p-1 hover:bg-slate-200 rounded-md text-slate-500 transition-colors shrink-0"
                           >
-                            {copiedText === 'wallet' ? <CheckCircle size={16} className="text-green-600 dark:text-green-400"/> : <Copy size={16} />}
+                            {copiedText === 'wallet' ? <CheckCircle size={16} className="text-green-600"/> : <Copy size={16} />}
                           </button>
                         </div>
                       </div>
                       
-                      <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/30 rounded-lg text-amber-700 dark:text-amber-400 text-xs">
+                      <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-lg text-amber-700 text-xs">
                         <AlertCircle size={16} className="shrink-0 mt-0.5" />
                          <p>{t.usdtInstruction}</p>
                       </div>
@@ -802,15 +782,15 @@ const App: React.FC = () => {
             </section>
 
             {/* Total Footer */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-4 md:static md:bg-transparent md:border-0 md:p-0 z-30 transition-colors">
-               <div className="max-w-3xl mx-auto flex items-center justify-between gap-4 md:bg-white md:dark:bg-slate-800 md:p-4 md:rounded-2xl md:shadow-lg md:border md:border-slate-100 md:dark:border-slate-700">
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 md:static md:bg-transparent md:border-0 md:p-0 z-30">
+               <div className="max-w-3xl mx-auto flex items-center justify-between gap-4 md:bg-white md:p-4 md:rounded-2xl md:shadow-lg md:border md:border-slate-100">
                  <div>
-                   <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{t.totalToPay}</p>
+                   <p className="text-xs text-slate-500 font-medium">{t.totalToPay}</p>
                    <div className="flex items-baseline gap-2">
-                     <span className="text-2xl font-bold text-slate-900 dark:text-white">{finalAmount > 0 ? finalAmount.toFixed(2) : '0.00'}</span>
+                     <span className="text-2xl font-bold text-slate-900">{finalAmount > 0 ? finalAmount.toFixed(2) : '0.00'}</span>
                      <span className="text-sm font-bold text-slate-400">MT</span>
                      {discountAmount > 0 && (
-                        <span className="text-xs text-green-600 dark:text-green-400 font-medium bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded-full">
+                        <span className="text-xs text-green-600 font-medium bg-green-100 px-2 py-0.5 rounded-full">
                           {t.savings} {discountAmount.toFixed(2)} MT
                         </span>
                      )}
@@ -818,7 +798,7 @@ const App: React.FC = () => {
                  </div>
                  <button 
                   onClick={handleCheckout}
-                  className="px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-all active:scale-95 bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200 dark:shadow-none"
+                  className="px-6 py-3 rounded-xl font-bold flex items-center gap-2 shadow-lg transition-all active:scale-95 bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200"
                  >
                    <span>{t.confirm}</span>
                    <ArrowRight size={20} />
@@ -836,35 +816,35 @@ const App: React.FC = () => {
         {activeTab === 'admin' && isAdmin && (
           <div className="space-y-6 animate-in fade-in">
              <div className="flex justify-between items-center">
-               <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Painel do Administrador</h2>
+               <h2 className="text-2xl font-bold text-slate-800">Painel do Administrador</h2>
                <button onClick={() => { setIsAdmin(false); setActiveTab('home'); }} className="text-red-500 text-sm font-bold">Sair</button>
              </div>
 
-             <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
-                <div className="p-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
-                  <h3 className="font-bold text-slate-700 dark:text-slate-300">Pedidos Recentes</h3>
+             <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="p-4 border-b border-slate-100 bg-slate-50">
+                  <h3 className="font-bold text-slate-700">Pedidos Recentes</h3>
                 </div>
                 {history.length === 0 ? (
-                  <div className="p-8 text-center text-slate-500 dark:text-slate-400">Nenhum pedido encontrado.</div>
+                  <div className="p-8 text-center text-slate-500">Nenhum pedido encontrado.</div>
                 ) : (
-                  <div className="divide-y divide-slate-100 dark:divide-slate-700">
+                  <div className="divide-y divide-slate-100">
                     {history.map(tx => (
-                      <div key={tx.id} className="p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                      <div key={tx.id} className="p-4 hover:bg-slate-50 transition-colors">
                         <div className="flex justify-between items-start mb-2">
                            <div>
                               <div className="flex items-center gap-2">
                                 <span className={`w-2 h-2 rounded-full ${tx.status === 'completed' ? 'bg-green-500' : tx.status === 'rejected' ? 'bg-red-500' : 'bg-yellow-500'}`}></span>
-                                <span className="font-mono font-bold text-slate-900 dark:text-white">{tx.id}</span>
+                                <span className="font-mono font-bold text-slate-900">{tx.id}</span>
                               </div>
                               <p className="text-xs text-slate-400">{tx.date}</p>
                            </div>
                            <div className="text-right">
-                              <p className="font-bold text-slate-800 dark:text-white">{tx.finalAmount.toFixed(2)} MT</p>
+                              <p className="font-bold text-slate-800">{tx.finalAmount.toFixed(2)} MT</p>
                               <p className="text-xs text-slate-500 uppercase">{tx.operator}</p>
                            </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 text-sm text-slate-600 dark:text-slate-300 mb-3 bg-slate-100 dark:bg-slate-900 p-3 rounded-lg">
+                        <div className="grid grid-cols-2 gap-2 text-sm text-slate-600 mb-3 bg-slate-100 p-3 rounded-lg">
                            <div><span className="text-slate-400 text-xs block">Número:</span> {tx.phoneNumber}</div>
                            <div><span className="text-slate-400 text-xs block">Método:</span> {PAYMENT_METHODS.find(p => p.id === tx.paymentMethod)?.name}</div>
                            {tx.paymentFrom && <div className="col-span-2"><span className="text-slate-400 text-xs block">Pagador:</span> {tx.paymentFrom}</div>}
@@ -889,12 +869,12 @@ const App: React.FC = () => {
 
                         {tx.status === 'completed' && (
                           <div className="flex justify-end gap-2 mt-2">
-                             <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-bold rounded-full flex items-center gap-1">
+                             <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full flex items-center gap-1">
                                <CheckCircle size={12}/> Aprovado
                              </span>
                              <button 
                                onClick={() => setReceiptTransaction(tx)}
-                               className="text-blue-600 dark:text-blue-400 text-xs font-bold hover:underline flex items-center gap-1"
+                               className="text-blue-600 text-xs font-bold hover:underline flex items-center gap-1"
                              >
                                <FileText size={12}/> Gerar Recibo
                              </button>
@@ -902,7 +882,7 @@ const App: React.FC = () => {
                         )}
                          {tx.status === 'rejected' && (
                            <div className="mt-2 text-right">
-                              <span className="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-xs font-bold rounded-full">Rejeitado</span>
+                              <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full">Rejeitado</span>
                            </div>
                         )}
                       </div>
@@ -915,14 +895,14 @@ const App: React.FC = () => {
 
         {activeTab === 'history' && (
           <div className="space-y-4 animate-in fade-in">
-            <h2 className="text-lg font-bold text-slate-800 dark:text-white">{t.historyTitle}</h2>
+            <h2 className="text-lg font-bold text-slate-800">{t.historyTitle}</h2>
             {history.length === 0 ? (
-              <div className="text-center py-10 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 transition-colors">
-                <History className="mx-auto text-slate-300 dark:text-slate-600 mb-3" size={48} />
-                <p className="text-slate-500 dark:text-slate-400">{t.noHistory}</p>
+              <div className="text-center py-10 bg-white rounded-2xl border border-slate-100 transition-colors">
+                <History className="mx-auto text-slate-300 mb-3" size={48} />
+                <p className="text-slate-500">{t.noHistory}</p>
                 <button 
                   onClick={() => setActiveTab('home')}
-                  className="text-blue-600 dark:text-blue-400 font-medium mt-2 hover:underline"
+                  className="text-blue-600 font-medium mt-2 hover:underline"
                 >
                   {t.makeFirstRecharge}
                 </button>
@@ -930,10 +910,10 @@ const App: React.FC = () => {
             ) : (
               <div className="space-y-3">
                 {history.map((tx) => (
-                  <div key={tx.id} className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm transition-colors">
+                  <div key={tx.id} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm transition-colors">
                     <div className="flex justify-between items-center mb-2">
                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center p-2 overflow-hidden">
+                          <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center p-2 overflow-hidden">
                             <img 
                               src={OPERATORS.find(o => o.id === tx.operator)?.logoUrl} 
                               alt="Op"
@@ -941,18 +921,18 @@ const App: React.FC = () => {
                             />
                           </div>
                           <div>
-                            <div className="font-bold text-slate-800 dark:text-white">{tx.phoneNumber}</div>
-                            <div className="text-xs text-slate-500 dark:text-slate-400">{tx.date} • {PAYMENT_METHODS.find(p => p.id === tx.paymentMethod)?.name}</div>
+                            <div className="font-bold text-slate-800">{tx.phoneNumber}</div>
+                            <div className="text-xs text-slate-500">{tx.date} • {PAYMENT_METHODS.find(p => p.id === tx.paymentMethod)?.name}</div>
                           </div>
                        </div>
                        <div className="text-right">
-                         <div className="font-bold text-slate-900 dark:text-white">{tx.finalAmount.toFixed(2)} MT</div>
+                         <div className="font-bold text-slate-900">{tx.finalAmount.toFixed(2)} MT</div>
                          <div className={`text-xs font-medium px-2 py-0.5 rounded-full inline-block ${
                            tx.status === 'completed' 
-                             ? 'text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-900/40 border border-green-200 dark:border-green-800' 
+                             ? 'text-green-700 bg-green-100 border border-green-200' 
                              : tx.status === 'rejected'
-                             ? 'text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/40 border border-red-200 dark:border-red-800'
-                             : 'text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-800'
+                             ? 'text-red-700 bg-red-100 border border-red-200'
+                             : 'text-amber-700 bg-amber-100 border border-amber-200'
                          }`}>
                            {tx.status === 'completed' ? t.completed : tx.status === 'rejected' ? 'Rejeitado' : t.pending}
                          </div>
@@ -961,7 +941,7 @@ const App: React.FC = () => {
                     {tx.status === 'completed' && (
                        <button 
                          onClick={() => setReceiptTransaction(tx)}
-                         className="w-full mt-2 py-2 text-xs font-bold text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-slate-700 rounded-lg hover:bg-blue-50 dark:hover:bg-slate-700/50 flex items-center justify-center gap-2"
+                         className="w-full mt-2 py-2 text-xs font-bold text-blue-600 border border-blue-100 rounded-lg hover:bg-blue-50 flex items-center justify-center gap-2"
                        >
                          <FileText size={14}/> Ver Recibo
                        </button>
